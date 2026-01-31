@@ -1,0 +1,38 @@
+modLoader = "javafml"
+loaderVersion = "[2,)"
+#issueTrackerURL = ""
+license = "MIT"
+
+[[mods]]
+modId = "dimensiontrapdoors"
+version = "${version}"
+displayName = "DimensionTrapdoors"
+authors = "Lommie"
+description = '''
+
+'''
+#logoFile = ""
+
+[[dependencies.dimensiontrapdoors]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.dimensiontrapdoors]]
+modId = "minecraft"
+type = "required"
+versionRange = "[1.21.11,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.dimensiontrapdoors]]
+modId = "architectury"
+type = "required"
+versionRange = "[19.0.1,)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[mixins]]
+config = "dimensiontrapdoors.mixins.json"
