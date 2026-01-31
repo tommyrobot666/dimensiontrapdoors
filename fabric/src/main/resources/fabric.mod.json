@@ -15,10 +15,10 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "lommie.dimensiontrapdoors.fabric.DimensiontrapdoorsFabric"
+      "lommie.dimensiontrapdoors.fabric.DimensionTrapdoorsFabric"
     ],
     "client": [
-      "lommie.dimensiontrapdoors.fabric.client.DimensiontrapdoorsFabricClient"
+      "lommie.dimensiontrapdoors.fabric.client.DimensionTrapdoorsFabricClient"
     ]
   },
   "mixins": [
