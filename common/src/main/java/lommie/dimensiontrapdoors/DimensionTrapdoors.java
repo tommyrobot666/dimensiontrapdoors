@@ -1,5 +1,6 @@
 package lommie.dimensiontrapdoors;
 
+import lommie.dimensiontrapdoors.block.ModBlockEntities;
 import lommie.dimensiontrapdoors.block.ModBlocks;
 import lommie.dimensiontrapdoors.item.ModItems;
 
@@ -11,6 +12,6 @@ public final class DimensionTrapdoors {
 
         ModBlocks.BLOCKS.register();
         ModItems.ITEMS.register();
-//        ModDimensionTypes.DIMENSION_TYPES.register();
+        ModBlockEntities.BLOCK_ENTITIES.register();
     }
 }

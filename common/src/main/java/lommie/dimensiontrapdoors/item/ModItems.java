@@ -24,4 +24,7 @@ public class ModItems {
 
     public final static DeferredSupplier<Item> DIMENSION_BLOCK =
             register("dimension_block", (p) -> new BlockItem(ModBlocks.DIMENSION_BLOCK.get(),p), new Item.Properties());
+
+    public final static DeferredSupplier<Item> PEDESTAL =
+            register("pedestal", (p) -> new BlockItem(ModBlocks.PEDESTAL.get(),p), new Item.Properties());
 }

@@ -23,4 +23,7 @@ public class ModBlocks {
 
     public final static DeferredSupplier<Block> DIMENSION_BLOCK =
             register("dimension_block", Block::new, BlockBehaviour.Properties.of());
+
+    public static final DeferredSupplier<Block> PEDESTAL =
+            register("pedestal", PedestalBlock::new, BlockBehaviour.Properties.of());
 }

@@ -7,6 +7,7 @@
     "ModelProviderMixin"
   ],
   "mixins": [
+    "BlockEntityTypeAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
