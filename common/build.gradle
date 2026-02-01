@@ -10,3 +10,7 @@ dependencies {
 
     modImplementation "dev.architectury:architectury:$rootProject.architectury_api_version"
 }
+
+loom {
+    accessWidenerPath = file("src/main/resources/dimensiontrapdoors.classtweaker")
+}

@@ -23,5 +23,5 @@ public class ModItems {
             register("dimension_darkness", (p) -> new BlockItem(ModBlocks.DIMENSION_DARKNESS.get(),p), new Item.Properties());
 
     public final static DeferredSupplier<Item> DIMENSION_BLOCK =
-            register("dimension_block", (p) -> new BlockItem(ModBlocks.DIMENSION_DARKNESS.get(),p), new Item.Properties());
+            register("dimension_block", (p) -> new BlockItem(ModBlocks.DIMENSION_BLOCK.get(),p), new Item.Properties());
 }

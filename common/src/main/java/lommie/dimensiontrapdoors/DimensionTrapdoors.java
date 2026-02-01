@@ -11,5 +11,6 @@ public final class DimensionTrapdoors {
 
         ModBlocks.BLOCKS.register();
         ModItems.ITEMS.register();
+//        ModDimensionTypes.DIMENSION_TYPES.register();
     }
 }

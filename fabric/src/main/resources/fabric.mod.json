@@ -19,6 +19,9 @@
     ],
     "client": [
       "lommie.dimensiontrapdoors.fabric.client.DimensionTrapdoorsFabricClient"
+    ],
+    "fabric-datagen": [
+      "lommie.dimensiontrapdoors.fabric.datagen.DataGen"
     ]
   },
   "mixins": [
@@ -33,5 +36,6 @@
   },
   "suggests": {
     "another-mod": "*"
-  }
+  },
+  "accessWidener" : "dimensiontrapdoors.classtweaker"
 }

@@ -1,6 +1,7 @@
 plugins {
     id 'com.github.johnrengelman.shadow'
-}
+    id 'net.neoforged.moddev' version '2.0.140'
+}//TODO remove neoforged.moddev
 
 architectury {
     platformSetupLoomIde()
@@ -55,4 +56,49 @@ shadowJar {
 
 remapJar {
     input.set shadowJar.archiveFile
+}
+//TODO make dataGen work
+/*def generatedResources = file("src/generated")
+
+sourceSets {
+    main {
+        resources.srcDir generatedResources
+    }
+}
+
+loom {
+    runs {
+        data {
+            data()
+            programArgs "--all", "--mod", "dimensiontrapdoors"
+            programArgs "--output", generatedResources.absolutePath
+        }
+    }
+}*/
+//TODO remove all code after this comment
+neoForge {
+    runs {
+        data {
+            clientData()
+            programArguments.addAll '--mod', "dimensiontrapdoors", '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+        }
+    }
+}
+
+/*runs {
+    clientData {
+        arguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+    }
+}*/
+
+tasks.register("forceNeoForgeDataRun", JavaExec) {
+    dependsOn build
+
+    doLast {
+        def run = neoForge.runs.named("data").get()
+
+        mainClass = run.getMainClass()
+        jvmArguments = run.getJvmArguments()
+        environment = run.getEnvironment() as Map<String, ?>
+    }
 }
