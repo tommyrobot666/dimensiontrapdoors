@@ -11,7 +11,7 @@ import java.util.Set;
 @Mixin(BlockEntityType.class)
 public interface BlockEntityTypeAccessor {
     @Invoker("<init>")
-    static BlockEntityType<?> BlockEntityType(BlockEntityType.BlockEntitySupplier<? extends BlockEntity> blockEntitySupplier, Set<Block> set) {
+    static <T extends BlockEntity> BlockEntityType<T> BlockEntityType(BlockEntityType.BlockEntitySupplier<T> blockEntitySupplier, Set<Block> set) {
         throw new AssertionError();
     }
 }

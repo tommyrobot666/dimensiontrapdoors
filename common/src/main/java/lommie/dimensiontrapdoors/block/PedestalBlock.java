@@ -1,6 +1,8 @@
 package lommie.dimensiontrapdoors.block;
 
 import com.mojang.serialization.MapCodec;
+import lommie.dimensiontrapdoors.blockentity.ModBlockEntities;
+import lommie.dimensiontrapdoors.blockentity.PedestalBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -33,7 +35,7 @@ public class PedestalBlock extends BaseEntityBlock {
 
     @Override
     public @Nullable <T extends BlockEntity> BlockEntityTicker<T> getTicker(@NotNull Level level, @NotNull BlockState blockState, @NotNull BlockEntityType<T> blockEntityType) {
-        return createTickerHelper(blockEntityType,ModBlockEntities.PEDESTAL.get(),((level1, blockPos, blockState1, blockEntity) -> PedestalBlockEntity.tick(level1,blockPos,blockState1, (PedestalBlockEntity) blockEntity)));
+        return createTickerHelper(blockEntityType, ModBlockEntities.PEDESTAL.get(),((level1, blockPos, blockState1, blockEntity) -> PedestalBlockEntity.tick(level1,blockPos,blockState1, (PedestalBlockEntity) blockEntity)));
     }
 
     @Override

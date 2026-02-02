@@ -1,9 +1,10 @@
-package lommie.dimensiontrapdoors.block;
+package lommie.dimensiontrapdoors.blockentity;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.ItemOwner;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -11,16 +12,19 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
-public class PedestalBlockEntity extends BlockEntity {
+import java.util.Objects;
+
+public class PedestalBlockEntity extends BlockEntity implements ItemOwner {
     public @NotNull ItemStack item = ItemStack.EMPTY;
 
     public PedestalBlockEntity(BlockPos blockPos, BlockState blockState) {
         super(ModBlockEntities.PEDESTAL.get(), blockPos, blockState);
     }
 
-    static void tick(Level level, BlockPos pos, BlockState state, PedestalBlockEntity e) {
+    public static void tick(Level level, BlockPos pos, BlockState state, PedestalBlockEntity e) {
 
     }
 
@@ -29,6 +33,9 @@ public class PedestalBlockEntity extends BlockEntity {
         item = itemStack;
         setChanged();
 
+        if (itemStack.isEmpty() && player.getItemInHand(interactionHand).isEmpty()){
+            return;
+        }
         level.playSound(null, pos, SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.BLOCKS);
     }
 
@@ -40,5 +47,20 @@ public class PedestalBlockEntity extends BlockEntity {
     @Override
     protected void loadAdditional(ValueInput i) {
         item = i.read("item",ItemStack.CODEC).orElseThrow();
+    }
+
+    @Override
+    public @NotNull Level level() {
+        return Objects.requireNonNull(getLevel());
+    }
+
+    @Override
+    public @NotNull Vec3 position() {
+        return getBlockPos().getCenter();
+    }
+
+    @Override
+    public float getVisualRotationYInDegrees() {
+        return 0;
     }
 }
