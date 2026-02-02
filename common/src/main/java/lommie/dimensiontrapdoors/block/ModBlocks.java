@@ -7,6 +7,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 
 import java.util.function.Function;
@@ -26,4 +27,7 @@ public class ModBlocks {
 
     public static final DeferredSupplier<Block> PEDESTAL =
             register("pedestal", PedestalBlock::new, BlockBehaviour.Properties.of());
+
+    public static final DeferredSupplier<Block> DIMENSION_TRAPDOOR =
+            register("dimension_trapdoor", DimensionTrapdoor::new, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_TRAPDOOR));
 }

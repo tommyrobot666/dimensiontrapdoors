@@ -1,0 +1,15 @@
+{
+  "type": "dimensiontrapdoors:trapdoor",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "biome": "dimensiontrapdoors:trapdoor",
+      "layers": [
+        {
+          "height": 0,
+          "block": "dimensiontrapdoors:dimension_darkness"
+        }
+      ]
+    }
+  }
+}

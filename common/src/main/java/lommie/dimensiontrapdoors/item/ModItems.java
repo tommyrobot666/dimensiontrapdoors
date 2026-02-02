@@ -27,4 +27,7 @@ public class ModItems {
 
     public final static DeferredSupplier<Item> PEDESTAL =
             register("pedestal", (p) -> new BlockItem(ModBlocks.PEDESTAL.get(),p), new Item.Properties());
+
+    public final static DeferredSupplier<Item> DIMENSION_TRAPDOOR =
+            register("dimension_trapdoor", (p) -> new BlockItem(ModBlocks.DIMENSION_TRAPDOOR.get(),p), new Item.Properties());
 }

@@ -1,0 +1,18 @@
+package lommie.dimensiontrapdoors.trapdoorroom;
+
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.Identifier;
+
+// x, y are trapdoorPos within TrapdoorRoomRegion
+public record TrapdoorRoomInfo(BlockPos relativeSpawnPos, int x, int y, Identifier structure, int roomRegionId) {
+    public static final Codec<TrapdoorRoomInfo> CODEC = RecordCodecBuilder.create((instance) ->
+            instance.group(
+                    BlockPos.CODEC.fieldOf("relativeSpawnPos").forGetter(TrapdoorRoomInfo::relativeSpawnPos),
+                    Codec.INT.fieldOf("x").forGetter(TrapdoorRoomInfo::x),
+                    Codec.INT.fieldOf("y").forGetter(TrapdoorRoomInfo::y),
+                    Identifier.CODEC.fieldOf("structure").forGetter(TrapdoorRoomInfo::structure),
+                    Codec.INT.fieldOf("roomRegionId").forGetter(TrapdoorRoomInfo::roomRegionId)
+            ).apply(instance,TrapdoorRoomInfo::new));
+}
