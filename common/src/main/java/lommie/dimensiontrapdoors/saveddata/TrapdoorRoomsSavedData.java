@@ -3,11 +3,9 @@ package lommie.dimensiontrapdoors.saveddata;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import lommie.dimensiontrapdoors.DimensionTrapdoors;
-import lommie.dimensiontrapdoors.trapdoorroom.DimensionEntrypoint;
-import lommie.dimensiontrapdoors.trapdoorroom.TrapdoorRoom;
-import lommie.dimensiontrapdoors.trapdoorroom.TrapdoorRoomInfo;
-import lommie.dimensiontrapdoors.trapdoorroom.TrapdoorRoomRegion;
+import lommie.dimensiontrapdoors.trapdoorroom.*;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
@@ -16,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class TrapdoorRoomsSavedData extends SavedData {
     public static Codec<@NotNull TrapdoorRoomsSavedData> CODEC = RecordCodecBuilder.create((instance)
@@ -63,13 +62,76 @@ public class TrapdoorRoomsSavedData extends SavedData {
         return entrypoints.stream().filter((e) -> e.trapdoorPos() == pos).findFirst().orElse(null);
     }
 
+    public @NotNull DimensionEntrypoint findEntrypointOrCreate(BlockPos pos){
+        DimensionEntrypoint entrypoint = findEntrypoint(pos);
+        if (entrypoint == null){
+            return createEntrypoint(pos);
+        }
+        return entrypoint;
+    }
+
+    private @NotNull DimensionEntrypoint createEntrypoint(BlockPos pos) {
+        TrapdoorRoom room = createRoom();
+        DimensionEntrypoint entrypoint = new DimensionEntrypoint(room.roomId(), pos);
+        entrypoints.add(entrypoint);
+        setDirty();
+        return entrypoint;
+    }
+
     public static TrapdoorRoomsSavedData getFromLevel(ServerLevel serverLevel){
-        return serverLevel.getDataStorage().get(TYPE);
+        return serverLevel.getDataStorage().computeIfAbsent(TYPE);
     }
 
     public TrapdoorRoom getRoom(int idx){
-        //TODO make a findRegion(pos) to use right region
-        //TODO add a cache?
-        return new TrapdoorRoom(rooms.get(idx),roomRegions.getFirst(),idx);
+        //T ODO make a findRegion(pos) to use right region
+        //T ODO or make a findRegion(idOfRoomThatIsIn
+        //TODO add a cache? (so that there's only one TrapdoorRoom instance per idx)
+        return new TrapdoorRoom(rooms.get(idx),findRegion(idx),idx);
+    }
+
+    public TrapdoorRoomRegion findRegion(int idOfRoomThatIsInRegion){
+        return roomRegions.stream().filter((r) -> r.roomsIds().contains(idOfRoomThatIsInRegion)).findFirst().orElseThrow();
+    }
+
+    public @Nullable TrapdoorRoomRegion getNotFullRegionWithRoomSize(int roomChunkSize){
+        return getNotFullRegions().filter((r) -> r.roomChunkSize() == roomChunkSize).findFirst().orElse(null);
+    }
+
+    public TrapdoorRoomRegion createRegion(int roomChunkSize){
+        //TODO calculate x and y from roomRegions.size() in a way that covers the least space
+        //TODO fail if room exists or add offset (to listSize) that gets ++ until no fail
+        int x = roomRegions.size();
+        int y = 0;
+        TrapdoorRoomRegion trapdoorRoomRegion = new TrapdoorRoomRegion(roomChunkSize,x,y,new ArrayList<>());
+        roomRegions.add(trapdoorRoomRegion);
+        setDirty();
+        return trapdoorRoomRegion;
+    }
+
+    public @NotNull TrapdoorRoomRegion currentNotFullRegion(int roomChunkSize){
+        TrapdoorRoomRegion trapdoorRoomRegion = getNotFullRegionWithRoomSize(roomChunkSize);
+        if (trapdoorRoomRegion == null){
+            return createRegion(roomChunkSize);
+        }
+        return trapdoorRoomRegion;
+    }
+
+    public Stream<TrapdoorRoomRegion> getNotFullRegions(){
+        return roomRegions.stream().filter((r) -> r.roomsIds().size() < r.maxRooms());
+    }
+
+    public TrapdoorRoom createRoom(){
+        //TODO randomly select from TrapdoorRoomType from registry (use a randomSource that's set in getFromLevel)
+        TrapdoorRoomType trapdoorRoomType = new TrapdoorRoomType(new BlockPos(8,1,8), Identifier.withDefaultNamespace(""),2);
+
+        //TODO spawn structure
+
+        TrapdoorRoomRegion roomRegion = currentNotFullRegion(trapdoorRoomType.chunksSize());
+        TrapdoorRoomInfo trapdoorRoomInfo = TrapdoorRoomInfo.fromType(trapdoorRoomType,0,0, roomRegions.indexOf(roomRegion));
+        rooms.add(trapdoorRoomInfo);
+        setDirty();
+        roomRegion.roomsIds().add(rooms.indexOf(trapdoorRoomInfo));
+
+        return getRoom(rooms.indexOf(trapdoorRoomInfo));
     }
 }

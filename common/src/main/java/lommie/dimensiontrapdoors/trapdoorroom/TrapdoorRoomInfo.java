@@ -15,4 +15,8 @@ public record TrapdoorRoomInfo(BlockPos relativeSpawnPos, int x, int y, Identifi
                     Identifier.CODEC.fieldOf("structure").forGetter(TrapdoorRoomInfo::structure),
                     Codec.INT.fieldOf("roomRegionId").forGetter(TrapdoorRoomInfo::roomRegionId)
             ).apply(instance,TrapdoorRoomInfo::new));
+
+    public static TrapdoorRoomInfo fromType(TrapdoorRoomType trapdoorRoomType, int x, int y, int roomRegionId) {
+        return new TrapdoorRoomInfo(trapdoorRoomType.relativeSpawnPos(),x,y,trapdoorRoomType.structure(),roomRegionId);
+    }
 }

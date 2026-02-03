@@ -6,6 +6,7 @@ import lommie.dimensiontrapdoors.trapdoorroom.DimensionEntrypoint;
 import lommie.dimensiontrapdoors.trapdoorroom.TrapdoorRoom;
 import lommie.dimensiontrapdoors.trapdoorroom.TrapdoorRoomInfo;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -27,27 +28,24 @@ public class DimensionTrapdoor extends TrapDoorBlock {
 
     @Override
     protected @NotNull InteractionResult useWithoutItem(@NotNull BlockState blockState, @NotNull Level level, @NotNull BlockPos blockPos, @NotNull Player player, @NotNull BlockHitResult blockHitResult) {
-        if (!(player.blockPosition().equals(blockPos) || (level instanceof ServerLevel))){
+        if (!player.blockPosition().equals(blockPos) || !(level instanceof ServerLevel serverLevel) || level.isClientSide()){
             return super.useWithoutItem(blockState, level, blockPos, player, blockHitResult);
         }
-        ServerLevel serverLevel = ((ServerLevel) level);
         TrapdoorRoomsSavedData savedData = TrapdoorRoomsSavedData.getFromLevel(serverLevel);
 
-        DimensionEntrypoint entrypoint = savedData.findEntrypoint(blockPos);
-        if (entrypoint != null){
-            TrapdoorRoom room = savedData.getRoom(entrypoint.roomId());
-            player.teleportTo(
-                    Objects.requireNonNull(serverLevel.getServer().getLevel(DimensionTrapdoors.TRAPDOOR_DIM)),
-                    room.globalSpawnPos().getX(),
-                    room.globalSpawnPos().getY(),
-                    room.globalSpawnPos().getZ(),
-                    Set.of(),
-                    0,0,
-                    false
-            );
-        } else {
-            player.displayClientMessage(Component.literal("No DimensionEntrypoint was found, but room generator does not exist!").withStyle(ChatFormatting.RED),false);
-        }
+        DimensionEntrypoint entrypoint = savedData.findEntrypointOrCreate(blockPos);
+
+        TrapdoorRoom room = savedData.getRoom(entrypoint.roomId());
+        player.teleportTo(
+                Objects.requireNonNull(serverLevel.getServer().getLevel(DimensionTrapdoors.TRAPDOOR_DIM)),
+                room.globalSpawnPos().getX(),
+                room.globalSpawnPos().getY(),
+                room.globalSpawnPos().getZ(),
+                Set.of(),
+                0,0,
+                false
+        );
+
 
         return InteractionResult.SUCCESS;
     }
