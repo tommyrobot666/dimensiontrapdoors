@@ -6,7 +6,7 @@
       "biome": "dimensiontrapdoors:trapdoor",
       "layers": [
         {
-          "height": 0,
+          "height": 1,
           "block": "dimensiontrapdoors:dimension_darkness"
         }
       ]
