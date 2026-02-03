@@ -11,8 +11,8 @@ import java.util.List;
 public record TrapdoorRoomRegion(int roomChunkSize, int x, int y, ArrayList<Integer> roomsIds) {
     public static final Codec<TrapdoorRoomRegion> CODEC = RecordCodecBuilder.create((instance) ->
             instance.group(Codec.INT.fieldOf("roomChunkSize").forGetter(TrapdoorRoomRegion::roomChunkSize),
-                            Codec.INT.fieldOf("x").forGetter(TrapdoorRoomRegion::roomChunkSize),
-                            Codec.INT.fieldOf("y").forGetter(TrapdoorRoomRegion::roomChunkSize),
+                            Codec.INT.fieldOf("x").forGetter(TrapdoorRoomRegion::x),
+                            Codec.INT.fieldOf("y").forGetter(TrapdoorRoomRegion::y),
                             Codec.INT.listOf().fieldOf("roomsIds").forGetter(TrapdoorRoomRegion::roomsIds))
                     .apply(instance,TrapdoorRoomRegion::noArrayList)
     );
@@ -24,7 +24,7 @@ public record TrapdoorRoomRegion(int roomChunkSize, int x, int y, ArrayList<Inte
     }
 
     public int maxRooms(){
-        return (int) Math.pow(REGION_CHUNK_SIZE/roomChunkSize,2);
+        return (int) Math.pow(width(),2);
     }
 
     public ChunkPos chunkPos(){
@@ -38,5 +38,9 @@ public record TrapdoorRoomRegion(int roomChunkSize, int x, int y, ArrayList<Inte
 
     public int roomLengthBlocks(){
         return roomChunkSize*VANILLA_CHUNK_SIZE;
+    }
+
+    public int width() {
+        return REGION_CHUNK_SIZE/roomChunkSize;
     }
 }

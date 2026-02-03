@@ -4,7 +4,7 @@ import net.minecraft.core.BlockPos;
 
 public record TrapdoorRoom(TrapdoorRoomInfo in, TrapdoorRoomRegion roomRegion, int roomId) {
     public BlockPos globalSpawnPos(){
-        return roomRegion.origin().offset(in.relativeSpawnPos());
+        return origin().offset(in.relativeSpawnPos());
     }
 
     public BlockPos origin(){

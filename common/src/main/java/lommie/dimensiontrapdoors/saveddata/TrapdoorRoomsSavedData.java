@@ -59,7 +59,7 @@ public class TrapdoorRoomsSavedData extends SavedData {
 
     public @Nullable DimensionEntrypoint findEntrypoint(BlockPos pos){
         // if this lags, use a data structure and regenerate it when entrypoints is changed
-        return entrypoints.stream().filter((e) -> e.trapdoorPos() == pos).findFirst().orElse(null);
+        return entrypoints.stream().filter((e) -> e.trapdoorPos().equals(pos)).findFirst().orElse(null);
     }
 
     public @NotNull DimensionEntrypoint findEntrypointOrCreate(BlockPos pos){
@@ -127,11 +127,18 @@ public class TrapdoorRoomsSavedData extends SavedData {
         //TODO spawn structure
 
         TrapdoorRoomRegion roomRegion = currentNotFullRegion(trapdoorRoomType.chunksSize());
-        TrapdoorRoomInfo trapdoorRoomInfo = TrapdoorRoomInfo.fromType(trapdoorRoomType,0,0, roomRegions.indexOf(roomRegion));
+        int[] trapdoorRoomPos = arrayIndexToPos(roomRegion.roomsIds().size(),roomRegion.width());
+        TrapdoorRoomInfo trapdoorRoomInfo = TrapdoorRoomInfo.fromType(trapdoorRoomType,trapdoorRoomPos[0],trapdoorRoomPos[1], roomRegions.indexOf(roomRegion));
         rooms.add(trapdoorRoomInfo);
         setDirty();
         roomRegion.roomsIds().add(rooms.indexOf(trapdoorRoomInfo));
 
         return getRoom(rooms.indexOf(trapdoorRoomInfo));
+    }
+
+    private int[] arrayIndexToPos(int idx, int width) {
+        int x = idx % width;
+        int y = idx / width;
+        return new int[]{x,y};
     }
 }
