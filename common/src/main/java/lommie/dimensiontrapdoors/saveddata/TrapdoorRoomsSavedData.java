@@ -5,8 +5,17 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import lommie.dimensiontrapdoors.DimensionTrapdoors;
 import lommie.dimensiontrapdoors.trapdoorroom.*;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.SectionPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
 import org.jetbrains.annotations.NotNull;
@@ -56,6 +65,7 @@ public class TrapdoorRoomsSavedData extends SavedData {
     public final ArrayList<TrapdoorRoomRegion> roomRegions;
     public final ArrayList<TrapdoorRoomInfo> rooms;
     public final ArrayList<DimensionEntrypoint> entrypoints;
+    ServerLevel level;
 
     public @Nullable DimensionEntrypoint findEntrypoint(BlockPos pos){
         // if this lags, use a data structure and regenerate it when entrypoints is changed
@@ -79,13 +89,15 @@ public class TrapdoorRoomsSavedData extends SavedData {
     }
 
     public static TrapdoorRoomsSavedData getFromLevel(ServerLevel serverLevel){
-        return serverLevel.getDataStorage().computeIfAbsent(TYPE);
+        return serverLevel.getDataStorage().computeIfAbsent(TYPE).setLevel(serverLevel);
+    }
+
+    private TrapdoorRoomsSavedData setLevel(ServerLevel serverLevel) {
+        level = serverLevel;
+        return this;
     }
 
     public TrapdoorRoom getRoom(int idx){
-        //T ODO make a findRegion(pos) to use right region
-        //T ODO or make a findRegion(idOfRoomThatIsIn
-        //TODO add a cache? (so that there's only one TrapdoorRoom instance per idx)
         return new TrapdoorRoom(rooms.get(idx),findRegion(idx),idx);
     }
 
@@ -124,16 +136,40 @@ public class TrapdoorRoomsSavedData extends SavedData {
         //TODO randomly select from TrapdoorRoomType from registry (use a randomSource that's set in getFromLevel)
         TrapdoorRoomType trapdoorRoomType = new TrapdoorRoomType(new BlockPos(8,1,8), Identifier.withDefaultNamespace(""),2);
 
-        //TODO spawn structure
-
         TrapdoorRoomRegion roomRegion = currentNotFullRegion(trapdoorRoomType.chunksSize());
         int[] trapdoorRoomPos = arrayIndexToPos(roomRegion.roomsIds().size(),roomRegion.width());
         TrapdoorRoomInfo trapdoorRoomInfo = TrapdoorRoomInfo.fromType(trapdoorRoomType,trapdoorRoomPos[0],trapdoorRoomPos[1], roomRegions.indexOf(roomRegion));
         rooms.add(trapdoorRoomInfo);
         setDirty();
         roomRegion.roomsIds().add(rooms.indexOf(trapdoorRoomInfo));
+        TrapdoorRoom room = getRoom(rooms.indexOf(trapdoorRoomInfo));
 
-        return getRoom(rooms.indexOf(trapdoorRoomInfo));
+        if (!trapdoorRoomType.structure().getPath().isEmpty()) {
+            placeStructure(trapdoorRoomType, room);
+        }
+
+        return room;
+    }
+
+    private void placeStructure(TrapdoorRoomType trapdoorRoomType, TrapdoorRoom room) {
+        RegistryAccess.Frozen registryAccess = level.getServer().registryAccess();
+        Holder.Reference<Structure> structureReference = registryAccess.get(Registries.STRUCTURE)
+                .orElseThrow().value().get(trapdoorRoomType.structure()).orElseThrow();
+        Structure structure = structureReference.value();
+        ServerChunkCache chunkSource = level.getChunkSource();
+        StructureStart structureStart = structure.generate(structureReference,level.dimension(),registryAccess,chunkSource.getGenerator(),
+                chunkSource.getGenerator().getBiomeSource(), chunkSource.randomState(),
+                level.getStructureManager(), level.getSeed(), new ChunkPos(room.origin()),
+                0, level, (biome) -> true);
+
+        BoundingBox boundingBox = structureStart.getBoundingBox();
+        ChunkPos chunkPos = new ChunkPos(SectionPos.blockToSectionCoord(boundingBox.minX()), SectionPos.blockToSectionCoord(boundingBox.minZ()));
+        ChunkPos chunkPos2 = new ChunkPos(SectionPos.blockToSectionCoord(boundingBox.maxX()), SectionPos.blockToSectionCoord(boundingBox.maxZ()));
+        ChunkPos.rangeClosed(chunkPos, chunkPos2).forEach((chunkPosX) -> {
+            structureStart.placeInChunk(level, level.structureManager(), chunkSource.getGenerator(), level.getRandom(),
+                    new BoundingBox(chunkPosX.getMinBlockX(), level.getMinY(), chunkPosX.getMinBlockZ(),
+                            chunkPosX.getMaxBlockX(), level.getMaxY() + 1, chunkPosX.getMaxBlockZ()), chunkPosX);
+        });
     }
 
     private int[] arrayIndexToPos(int idx, int width) {
