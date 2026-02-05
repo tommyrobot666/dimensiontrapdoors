@@ -4,12 +4,13 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import lommie.dimensiontrapdoors.DimensionTrapdoors;
 import lommie.dimensiontrapdoors.trapdoorroom.*;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.Identifier;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
@@ -23,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class TrapdoorRoomsSavedData extends SavedData {
@@ -133,8 +135,8 @@ public class TrapdoorRoomsSavedData extends SavedData {
     }
 
     public TrapdoorRoom createRoom(){
-        //TODO randomly select from TrapdoorRoomType from registry (use a randomSource that's set in getFromLevel)
-        TrapdoorRoomType trapdoorRoomType = new TrapdoorRoomType(new BlockPos(8,1,8), Identifier.withDefaultNamespace(""),2);
+        TrapdoorRoomType trapdoorRoomType = DimensionTrapdoors.TRAPDOOR_ROOM_TYPES.byId(
+                level.random.nextInt(0,DimensionTrapdoors.TRAPDOOR_ROOM_TYPES.size()));
 
         TrapdoorRoomRegion roomRegion = currentNotFullRegion(trapdoorRoomType.chunksSize());
         int[] trapdoorRoomPos = arrayIndexToPos(roomRegion.roomsIds().size(),roomRegion.width());
@@ -145,16 +147,25 @@ public class TrapdoorRoomsSavedData extends SavedData {
         TrapdoorRoom room = getRoom(rooms.indexOf(trapdoorRoomInfo));
 
         if (!trapdoorRoomType.structure().getPath().isEmpty()) {
-            placeStructure(trapdoorRoomType, room);
+            RegistryAccess.Frozen registryAccess = level.getServer().registryAccess();
+            Optional<Holder.Reference<Structure>> structureReference = registryAccess.get(Registries.STRUCTURE)
+                    .orElseThrow().value().get(trapdoorRoomType.structure());
+            if (structureReference.isPresent()) {
+                placeStructure(registryAccess,structureReference.get(),trapdoorRoomType, room);
+            } else {
+                level.players().forEach(
+                        (p) -> p.sendSystemMessage(Component.literal(
+                                "Error when generating structure: "
+                                        +trapdoorRoomType.structure()+" not found")
+                                .withStyle(ChatFormatting.RED,ChatFormatting.UNDERLINE))
+                );
+            }
         }
 
         return room;
     }
 
-    private void placeStructure(TrapdoorRoomType trapdoorRoomType, TrapdoorRoom room) {
-        RegistryAccess.Frozen registryAccess = level.getServer().registryAccess();
-        Holder.Reference<Structure> structureReference = registryAccess.get(Registries.STRUCTURE)
-                .orElseThrow().value().get(trapdoorRoomType.structure()).orElseThrow();
+    private void placeStructure(RegistryAccess.Frozen registryAccess, Holder.Reference<Structure> structureReference, TrapdoorRoomType trapdoorRoomType, TrapdoorRoom room) {
         Structure structure = structureReference.value();
         ServerChunkCache chunkSource = level.getChunkSource();
         StructureStart structureStart = structure.generate(structureReference,level.dimension(),registryAccess,chunkSource.getGenerator(),
