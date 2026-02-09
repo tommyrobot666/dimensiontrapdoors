@@ -6,17 +6,8 @@ import lommie.dimensiontrapdoors.DimensionTrapdoors;
 import lommie.dimensiontrapdoors.trapdoorroom.*;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.SectionPos;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
-import net.minecraft.world.level.levelgen.structure.Structure;
-import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
@@ -110,19 +101,34 @@ public class TrapdoorRoomsSavedData extends SavedData {
         return roomRegions.stream().filter((r) -> r.roomsIds().contains(idOfRoomThatIsInRegion)).findFirst().orElseThrow();
     }
 
+    public Optional<TrapdoorRoomRegion> findRegion(int x, int y){
+        return roomRegions.stream().filter((r) -> r.x() == x && r.y() == y).findFirst();
+    }
+
     public @Nullable TrapdoorRoomRegion getNotFullRegionWithRoomSize(int roomChunkSize){
         return getNotFullRegions().filter((r) -> r.roomChunkSize() == roomChunkSize).findFirst().orElse(null);
     }
 
     public TrapdoorRoomRegion createRegion(int roomChunkSize){
-        //TODO calculate x and y from roomRegions.size() in a way that covers the least space
-        //TODO fail if room exists or add offset (to listSize) that gets ++ until no fail
-        int x = roomRegions.size();
-        int y = 0;
+        int[] trapdoorRoomPos;
+        trapdoorRoomPos = nextNewRegionPos();
+        int x = trapdoorRoomPos[0];
+        int y = trapdoorRoomPos[1];
         TrapdoorRoomRegion trapdoorRoomRegion = new TrapdoorRoomRegion(roomChunkSize,x,y,new ArrayList<>());
         roomRegions.add(trapdoorRoomRegion);
         setDirty();
         return trapdoorRoomRegion;
+    }
+
+    private int @NotNull [] nextNewRegionPos() {
+        int[] trapdoorRoomPos;
+        int roomRegionPlacementFunctionOffset = -1;
+        do {
+            roomRegionPlacementFunctionOffset++;
+            int i = roomRegions.size() + 1 + roomRegionPlacementFunctionOffset;
+            trapdoorRoomPos = arrayIndexToPos(i, (int) Math.ceil(Math.sqrt(i)));
+        } while (findRegion(trapdoorRoomPos[0],trapdoorRoomPos[1]).isPresent());
+        return trapdoorRoomPos;
     }
 
     public @NotNull TrapdoorRoomRegion currentNotFullRegion(int roomChunkSize){
@@ -161,7 +167,8 @@ public class TrapdoorRoomsSavedData extends SavedData {
         }
         optionalTemplate = structureManager.get(DimensionTrapdoors.TRAPDOOR_ROOM_TYPES.getDefaultKey());
         StructureTemplate template = optionalTemplate.orElseThrow();
-        template.placeInWorld(level, room.origin(), room.origin(), new StructurePlaceSettings(), level.getRandom(), 0);
+        // I have no clue what the number that I put into the flags argument does
+        template.placeInWorld(level, room.origin(), room.origin(), new StructurePlaceSettings(), level.getRandom(), 0b1100110010);
 
 
         return room;

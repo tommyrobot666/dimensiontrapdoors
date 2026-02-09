@@ -20,6 +20,7 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
     protected void generate() {
         dropSelf(ModBlocks.DIMENSION_BLOCK.get());
         dropOther(ModBlocks.DIMENSION_DARKNESS.get(),ModBlocks.DIMENSION_BLOCK.get().asItem());
+        dropSelf(ModBlocks.DIMENSION_TRAPDOOR.get());
     }
 
     @Override
