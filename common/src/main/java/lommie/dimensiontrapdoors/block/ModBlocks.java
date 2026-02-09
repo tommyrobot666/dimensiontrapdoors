@@ -20,7 +20,7 @@ public class ModBlocks {
     }
 
     public final static DeferredSupplier<Block> DIMENSION_DARKNESS =
-            register("dimension_darkness", Block::new, BlockBehaviour.Properties.of());
+            register("dimension_darkness", Block::new, BlockBehaviour.Properties.of().strength(-1.0F, 99999999.0F));
 
     public final static DeferredSupplier<Block> DIMENSION_BLOCK =
             register("dimension_block", Block::new, BlockBehaviour.Properties.of());
@@ -29,5 +29,5 @@ public class ModBlocks {
             register("pedestal", PedestalBlock::new, BlockBehaviour.Properties.of());
 
     public static final DeferredSupplier<Block> DIMENSION_TRAPDOOR =
-            register("dimension_trapdoor", DimensionTrapdoor::new, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_TRAPDOOR));
+            register("dimension_trapdoor", DimensionTrapdoor::new, BlockBehaviour.Properties.ofFullCopy(Blocks.CRIMSON_TRAPDOOR));
 }

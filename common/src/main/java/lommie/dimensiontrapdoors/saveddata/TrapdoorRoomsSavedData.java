@@ -17,6 +17,9 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
 import org.jetbrains.annotations.NotNull;
@@ -146,41 +149,22 @@ public class TrapdoorRoomsSavedData extends SavedData {
         roomRegion.roomsIds().add(rooms.indexOf(trapdoorRoomInfo));
         TrapdoorRoom room = getRoom(rooms.indexOf(trapdoorRoomInfo));
 
-        if (!trapdoorRoomType.structure().getPath().isEmpty()) {
-            RegistryAccess.Frozen registryAccess = level.getServer().registryAccess();
-            Optional<Holder.Reference<Structure>> structureReference = registryAccess.get(Registries.STRUCTURE)
-                    .orElseThrow().value().get(trapdoorRoomType.structure());
-            if (structureReference.isPresent()) {
-                placeStructure(registryAccess,structureReference.get(),trapdoorRoomType, room);
-            } else {
-                level.players().forEach(
-                        (p) -> p.sendSystemMessage(Component.literal(
-                                "Error when generating structure: "
-                                        +trapdoorRoomType.structure()+" not found")
-                                .withStyle(ChatFormatting.RED,ChatFormatting.UNDERLINE))
-                );
-            }
+        StructureTemplateManager structureManager = level.getServer().getStructureManager();
+        Optional<StructureTemplate> optionalTemplate = structureManager.get(trapdoorRoomType.structure());
+        if (optionalTemplate.isEmpty()){
+            level.players().forEach(
+                    (p) -> p.sendSystemMessage(Component.literal(
+                                    "Error when generating structure: "
+                                            +trapdoorRoomType.structure()+" not found, generating default room")
+                            .withStyle(ChatFormatting.RED,ChatFormatting.UNDERLINE))
+            );
         }
+        optionalTemplate = structureManager.get(DimensionTrapdoors.TRAPDOOR_ROOM_TYPES.getDefaultKey());
+        StructureTemplate template = optionalTemplate.orElseThrow();
+        template.placeInWorld(level, room.origin(), room.origin(), new StructurePlaceSettings(), level.getRandom(), 0);
+
 
         return room;
-    }
-
-    private void placeStructure(RegistryAccess.Frozen registryAccess, Holder.Reference<Structure> structureReference, TrapdoorRoomType trapdoorRoomType, TrapdoorRoom room) {
-        Structure structure = structureReference.value();
-        ServerChunkCache chunkSource = level.getChunkSource();
-        StructureStart structureStart = structure.generate(structureReference,level.dimension(),registryAccess,chunkSource.getGenerator(),
-                chunkSource.getGenerator().getBiomeSource(), chunkSource.randomState(),
-                level.getStructureManager(), level.getSeed(), new ChunkPos(room.origin()),
-                0, level, (biome) -> true);
-
-        BoundingBox boundingBox = structureStart.getBoundingBox();
-        ChunkPos chunkPos = new ChunkPos(SectionPos.blockToSectionCoord(boundingBox.minX()), SectionPos.blockToSectionCoord(boundingBox.minZ()));
-        ChunkPos chunkPos2 = new ChunkPos(SectionPos.blockToSectionCoord(boundingBox.maxX()), SectionPos.blockToSectionCoord(boundingBox.maxZ()));
-        ChunkPos.rangeClosed(chunkPos, chunkPos2).forEach((chunkPosX) -> {
-            structureStart.placeInChunk(level, level.structureManager(), chunkSource.getGenerator(), level.getRandom(),
-                    new BoundingBox(chunkPosX.getMinBlockX(), level.getMinY(), chunkPosX.getMinBlockZ(),
-                            chunkPosX.getMaxBlockX(), level.getMaxY() + 1, chunkPosX.getMaxBlockZ()), chunkPosX);
-        });
     }
 
     private int[] arrayIndexToPos(int idx, int width) {
