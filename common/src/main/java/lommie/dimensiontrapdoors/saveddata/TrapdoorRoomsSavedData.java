@@ -6,8 +6,14 @@ import lommie.dimensiontrapdoors.DimensionTrapdoors;
 import lommie.dimensiontrapdoors.trapdoorroom.*;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeResolver;
+import net.minecraft.world.level.biome.Climate;
+import net.minecraft.world.level.biome.FixedBiomeSource;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
@@ -170,6 +176,20 @@ public class TrapdoorRoomsSavedData extends SavedData {
         // I have no clue what the number that I put into the flags argument does
         template.placeInWorld(level, room.origin(), room.origin(), new StructurePlaceSettings(), level.getRandom(), 0b1100110010);
 
+        if (trapdoorRoomType.biome().isPresent()){
+            Holder<Biome> biomeHolder = level.registryAccess().lookupOrThrow(Registries.BIOME)
+                    .get(trapdoorRoomType.biome().get()).orElseThrow();
+            BiomeResolver biomeSource = new FixedBiomeSource(biomeHolder);
+            for (int i = 0; i < trapdoorRoomType.chunksSize(); i++) {
+                for (int j = 0; j < trapdoorRoomType.chunksSize(); j++) {
+                    level.getChunk(room.origin().offset(new BlockPos(i*TrapdoorRoomRegion.VANILLA_CHUNK_SIZE,0,j*TrapdoorRoomRegion.VANILLA_CHUNK_SIZE)))
+                            .fillBiomesFromNoise(
+                            biomeSource,
+                            level.getChunkSource().randomState().sampler()
+                    );
+                }
+            }
+        }
 
         return room;
     }
