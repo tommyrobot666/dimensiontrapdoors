@@ -164,8 +164,8 @@ public class TrapdoorRoomsSavedData extends SavedData {
                                             +trapdoorRoomType.structure()+" not found, generating default room")
                             .withStyle(ChatFormatting.RED,ChatFormatting.UNDERLINE))
             );
+            optionalTemplate = structureManager.get(DimensionTrapdoors.TRAPDOOR_ROOM_TYPES.getDefaultKey());
         }
-        optionalTemplate = structureManager.get(DimensionTrapdoors.TRAPDOOR_ROOM_TYPES.getDefaultKey());
         StructureTemplate template = optionalTemplate.orElseThrow();
         // I have no clue what the number that I put into the flags argument does
         template.placeInWorld(level, room.origin(), room.origin(), new StructurePlaceSettings(), level.getRandom(), 0b1100110010);

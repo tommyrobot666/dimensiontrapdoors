@@ -1,0 +1,10 @@
+You will forget about this project one day,
+This is how you made datagen work on forge.
+
+1. fabric datagen
+2. copy fabric:generated to forge:resources
+3. open in file explorer
+4. drag contents to resources in file explorer
+
+why not drag in ide?
+only moves the most inner folders

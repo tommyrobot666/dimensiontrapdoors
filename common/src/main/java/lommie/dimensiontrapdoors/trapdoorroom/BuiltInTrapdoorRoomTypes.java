@@ -18,6 +18,6 @@ public class BuiltInTrapdoorRoomTypes {
 
     public static void register(){
         registerType("empty",new BlockPos(8,1,8),1);
-        registerType("hallway",new BlockPos(2,1,8),3);
+        registerType("hallway",new BlockPos(8,1,1),3);
     }
 }
