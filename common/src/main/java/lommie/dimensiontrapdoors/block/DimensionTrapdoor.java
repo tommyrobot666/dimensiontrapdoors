@@ -33,7 +33,7 @@ public class DimensionTrapdoor extends TrapDoorBlock {
         }
         TrapdoorRoomsSavedData savedData = TrapdoorRoomsSavedData.getFromLevel(serverLevel);
 
-        DimensionEntrypoint entrypoint = savedData.findEntrypointOrCreate(blockPos);
+        DimensionEntrypoint entrypoint = savedData.findEntrypointOrCreate(blockPos,player);
 
         TrapdoorRoom room = savedData.getRoom(entrypoint.roomId());
         player.teleportTo(

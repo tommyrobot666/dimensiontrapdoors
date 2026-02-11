@@ -3,6 +3,7 @@ package lommie.dimensiontrapdoors.saveddata;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import lommie.dimensiontrapdoors.DimensionTrapdoors;
+import lommie.dimensiontrapdoors.block.ModBlocks;
 import lommie.dimensiontrapdoors.trapdoorroom.*;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -10,10 +11,13 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeResolver;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.biome.FixedBiomeSource;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
@@ -23,6 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -74,20 +79,57 @@ public class TrapdoorRoomsSavedData extends SavedData {
         return entrypoints.stream().filter((e) -> e.trapdoorPos().equals(pos)).findFirst().orElse(null);
     }
 
-    public @NotNull DimensionEntrypoint findEntrypointOrCreate(BlockPos pos){
+    public @NotNull DimensionEntrypoint findEntrypointOrCreate(BlockPos pos, @Nullable Entity traveling){
         DimensionEntrypoint entrypoint = findEntrypoint(pos);
         if (entrypoint == null){
-            return createEntrypoint(pos);
+            return createEntrypoint(pos, traveling);
         }
         return entrypoint;
     }
 
-    private @NotNull DimensionEntrypoint createEntrypoint(BlockPos pos) {
+    private @NotNull DimensionEntrypoint createEntrypoint(BlockPos pos, @Nullable Entity traveling) {
         TrapdoorRoom room = createRoom();
-        DimensionEntrypoint entrypoint = new DimensionEntrypoint(room.roomId(), pos);
+        DimensionEntrypoint entrypoint = new DimensionEntrypoint(room.roomId(), pos, traveling != null ? getCurrentRoom(traveling) : Optional.empty());
+        if (entrypoint.fromRoomId().isPresent()){
+            entrypoints.add(new DimensionEntrypoint(
+                    entrypoint.fromRoomId().orElseThrow(),
+                    room.globalSpawnPos(),
+                    Optional.empty()
+            ));
+            if (level.getBlockState(room.globalSpawnPos()).canBeReplaced()){
+                level.setBlockAndUpdate(room.globalSpawnPos(), ModBlocks.DIMENSION_TRAPDOOR.get().defaultBlockState());
+                BlockState below = level.getBlockState(room.globalSpawnPos().below());
+                if (below.canBeReplaced() || below.is(ModBlocks.DIMENSION_DARKNESS.get())){
+                    level.setBlockAndUpdate(room.globalSpawnPos().below(),ModBlocks.DIMENSION_DARKNESS_SWIRL.get().defaultBlockState());
+                }
+            }
+        }
         entrypoints.add(entrypoint);
         setDirty();
         return entrypoint;
+    }
+
+    private Optional<Integer> getCurrentRoom(@NotNull Entity traveling) {
+        if (traveling.level().dimension().equals(DimensionTrapdoors.TRAPDOOR_DIM)){
+            ChunkPos chunkPos = traveling.chunkPosition();
+            Optional<TrapdoorRoomRegion> roomRegion = findRegion(
+                    chunkPos.x/TrapdoorRoomRegion.REGION_CHUNK_SIZE,
+                    chunkPos.z/TrapdoorRoomRegion.REGION_CHUNK_SIZE);
+            if (roomRegion.isEmpty()){
+                return Optional.empty();
+            }
+            Stream<TrapdoorRoom> rooms = roomRegion.orElseThrow().roomsIds().stream().map(this::getRoom);
+            rooms = rooms.filter((room) -> {
+                BlockPos diff = traveling.blockPosition().subtract(room.origin());
+                if (diff.getX() < 0 || diff.getZ() < 0){
+                    return false;
+                }
+                return true;
+            });
+            TrapdoorRoom theRoom = rooms.min(Comparator.comparingDouble(r -> r.origin().distSqr(traveling.blockPosition()))).orElseThrow();
+            return Optional.of(theRoom.roomId());
+        }
+        return Optional.empty();
     }
 
     public static TrapdoorRoomsSavedData getFromLevel(ServerLevel serverLevel){
