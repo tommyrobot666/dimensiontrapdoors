@@ -30,4 +30,7 @@ public class ModItems {
 
     public final static DeferredSupplier<Item> DIMENSION_TRAPDOOR =
             register("dimension_trapdoor", (p) -> new BlockItem(ModBlocks.DIMENSION_TRAPDOOR.get(),p), new Item.Properties());
+
+    public final static DeferredSupplier<Item> DIMENSION_DARKNESS_SWIRL =
+            register("dimension_darkness_swirl", (p) -> new BlockItem(ModBlocks.DIMENSION_DARKNESS_SWIRL.get(),p), new Item.Properties());
 }

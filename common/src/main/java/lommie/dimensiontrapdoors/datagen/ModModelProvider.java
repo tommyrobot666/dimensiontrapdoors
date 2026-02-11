@@ -17,6 +17,8 @@ public class ModModelProvider extends ModelProvider {
         g.registerSimpleFlatItemModel(ModBlocks.DIMENSION_DARKNESS.get());
         g.registerSimpleFlatItemModel(ModBlocks.DIMENSION_BLOCK.get());
         g.createTrapdoor(ModBlocks.DIMENSION_TRAPDOOR.get());
+        g.createTrivialCube(ModBlocks.DIMENSION_DARKNESS_SWIRL.get());
+        g.registerSimpleFlatItemModel(ModBlocks.DIMENSION_DARKNESS_SWIRL.get());
     }
 
     public void generateItemModels(ItemModelGenerators g) {

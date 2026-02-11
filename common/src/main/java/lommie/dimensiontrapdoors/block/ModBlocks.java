@@ -22,6 +22,9 @@ public class ModBlocks {
     public final static DeferredSupplier<Block> DIMENSION_DARKNESS =
             register("dimension_darkness", Block::new, BlockBehaviour.Properties.of().strength(-1.0F, 99999999.0F));
 
+    public final static DeferredSupplier<Block> DIMENSION_DARKNESS_SWIRL =
+            register("dimension_darkness_swirl", Block::new, BlockBehaviour.Properties.of().strength(-1.0F, 99999999.0F));
+
     public final static DeferredSupplier<Block> DIMENSION_BLOCK =
             register("dimension_block", Block::new, BlockBehaviour.Properties.of());
 
