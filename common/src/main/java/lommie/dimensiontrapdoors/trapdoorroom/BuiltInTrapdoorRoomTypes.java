@@ -28,6 +28,6 @@ public class BuiltInTrapdoorRoomTypes {
         registerType("water_elevators",new BlockPos(2,6,2),1);
         registerType("watery_coral",new BlockPos(8,40,8),1,Identifier.withDefaultNamespace("warm_ocean"));
         registerType("treasure_maze_hidden",new BlockPos(1,32,1),1);
-        registerType("skyblock",new BlockPos(15*8+7,27,16*8+7),16);
+        registerType("skyblock",new BlockPos(15*8+3,27,16*8+7),16);
     }
 }
