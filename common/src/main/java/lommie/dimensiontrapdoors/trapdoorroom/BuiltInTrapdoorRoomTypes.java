@@ -24,6 +24,8 @@ public class BuiltInTrapdoorRoomTypes {
 
     public static void register(){
         registerType("empty",new BlockPos(8,1,8),1);
-        registerType("hallway",new BlockPos(8,1,1),3);
+        registerType("hallway",new BlockPos(7,1,1),3);
+        registerType("water_elevators",new BlockPos(2,6,2),1);
+        registerType("watery_coral",new BlockPos(8,40,8),1);
     }
 }
