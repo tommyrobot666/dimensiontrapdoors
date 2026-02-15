@@ -35,12 +35,21 @@ public class DimensionTrapdoor extends TrapDoorBlock {
 
         DimensionEntrypoint entrypoint = savedData.findEntrypointOrCreate(blockPos,player);
 
-        TrapdoorRoom room = savedData.getRoom(entrypoint.roomId());
+        BlockPos tpTo;
+
+        if (entrypoint.toEntrypointId().isPresent()){
+            DimensionEntrypoint toEntrypoint = savedData.entrypoints.get(entrypoint.toEntrypointId().get());
+            tpTo = toEntrypoint.trapdoorPos();
+        } else {
+            TrapdoorRoom room = savedData.getRoom(entrypoint.roomId());
+            tpTo = room.globalSpawnPos();
+        }
+
         player.teleportTo(
                 Objects.requireNonNull(serverLevel.getServer().getLevel(DimensionTrapdoors.TRAPDOOR_DIM)),
-                room.globalSpawnPos().getX(),
-                room.globalSpawnPos().getY(),
-                room.globalSpawnPos().getZ(),
+                tpTo.getX(),
+                tpTo.getY(),
+                tpTo.getZ(),
                 Set.of(),
                 0,0,
                 false

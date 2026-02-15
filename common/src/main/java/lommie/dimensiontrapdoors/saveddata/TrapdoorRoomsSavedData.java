@@ -89,12 +89,14 @@ public class TrapdoorRoomsSavedData extends SavedData {
 
     private @NotNull DimensionEntrypoint createEntrypoint(BlockPos pos, @Nullable Entity traveling) {
         TrapdoorRoom room = createRoom();
-        DimensionEntrypoint entrypoint = new DimensionEntrypoint(room.roomId(), pos, traveling != null ? getCurrentRoom(traveling) : Optional.empty());
+        DimensionEntrypoint entrypoint = new DimensionEntrypoint(room.roomId(), pos, traveling != null ? getCurrentRoom(traveling) : Optional.empty(),Optional.empty());
+        entrypoints.add(entrypoint);
         if (entrypoint.fromRoomId().isPresent()){
             entrypoints.add(new DimensionEntrypoint(
                     entrypoint.fromRoomId().orElseThrow(),
                     room.globalSpawnPos(),
-                    Optional.empty()
+                    Optional.empty(),
+                    Optional.of(entrypoints.indexOf(entrypoint))
             ));
             if (level.getBlockState(room.globalSpawnPos()).canBeReplaced()){
                 level.setBlockAndUpdate(room.globalSpawnPos(), ModBlocks.DIMENSION_TRAPDOOR.get().defaultBlockState());
@@ -104,7 +106,6 @@ public class TrapdoorRoomsSavedData extends SavedData {
                 }
             }
         }
-        entrypoints.add(entrypoint);
         setDirty();
         return entrypoint;
     }
