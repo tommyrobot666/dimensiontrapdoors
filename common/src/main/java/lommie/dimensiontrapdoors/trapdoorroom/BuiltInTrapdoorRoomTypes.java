@@ -28,6 +28,12 @@ public class BuiltInTrapdoorRoomTypes {
         registerType("water_elevators",new BlockPos(2,6,2),1);
         registerType("watery_coral",new BlockPos(8,40,8),1,Identifier.withDefaultNamespace("warm_ocean"));
         registerType("treasure_maze_hidden",new BlockPos(1,32,1),1);
-        registerType("skyblock",new BlockPos(15*8+3,27,16*8+7),16);
+        registerType("skyblock",new BlockPos(16*7+8,27,16*8+7),16);
+        registerType("tiny_piece_of_overworld",new BlockPos(6,11-7,6),1);
+        // This structure allowed the player to escape and the trapdoor placed below the player blocked the room
+//        registerType("the_truth",new BlockPos(1,68,1),1);
+        for (int i = 1; i < 5; i++) {
+            registerType("mining_pit_"+i, new BlockPos(1, 21 - 4, 1), 1);
+        }
     }
 }
