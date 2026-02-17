@@ -10,12 +10,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeResolver;
-import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.biome.FixedBiomeSource;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
@@ -134,7 +134,7 @@ public class TrapdoorRoomsSavedData extends SavedData {
     }
 
     public static TrapdoorRoomsSavedData getFromLevel(ServerLevel serverLevel){
-        return serverLevel.getDataStorage().computeIfAbsent(TYPE).setLevel(serverLevel);
+        return serverLevel.getServer().overworld().getDataStorage().computeIfAbsent(TYPE).setLevel(serverLevel);
     }
 
     private TrapdoorRoomsSavedData setLevel(ServerLevel serverLevel) {
@@ -204,27 +204,21 @@ public class TrapdoorRoomsSavedData extends SavedData {
         roomRegion.roomsIds().add(rooms.indexOf(trapdoorRoomInfo));
         TrapdoorRoom room = getRoom(rooms.indexOf(trapdoorRoomInfo));
 
-        StructureTemplateManager structureManager = level.getServer().getStructureManager();
-        Optional<StructureTemplate> optionalTemplate = structureManager.get(trapdoorRoomType.structure());
-        if (optionalTemplate.isEmpty()){
-            level.players().forEach(
-                    (p) -> p.sendSystemMessage(Component.literal(
-                                    "Error when generating structure: "
-                                            +trapdoorRoomType.structure()+" not found, generating default room")
-                            .withStyle(ChatFormatting.RED,ChatFormatting.UNDERLINE))
-            );
-            optionalTemplate = structureManager.get(DimensionTrapdoors.TRAPDOOR_ROOM_TYPES.getDefaultKey());
-        }
-        StructureTemplate template = optionalTemplate.orElseThrow();
-        // I have no clue what the number that I put into the flags argument does
-        template.placeInWorld(level, room.origin(), room.origin(), new StructurePlaceSettings(), level.getRandom(), 0b1100110010);
+        generateStructure(trapdoorRoomType.structure(), room);
 
-        if (trapdoorRoomType.biome().isPresent()){
+        placeBiome(trapdoorRoomType.biome(), trapdoorRoomType.chunksSize(), room);
+
+        return room;
+    }
+
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    private void placeBiome(Optional<Identifier> biome, int chunksSize, TrapdoorRoom room) {
+        if (biome.isPresent()){
             Holder<Biome> biomeHolder = level.registryAccess().lookupOrThrow(Registries.BIOME)
-                    .get(trapdoorRoomType.biome().get()).orElseThrow();
+                    .get(biome.get()).orElseThrow();
             BiomeResolver biomeSource = new FixedBiomeSource(biomeHolder);
-            for (int i = 0; i < trapdoorRoomType.chunksSize(); i++) {
-                for (int j = 0; j < trapdoorRoomType.chunksSize(); j++) {
+            for (int i = 0; i < chunksSize; i++) {
+                for (int j = 0; j < chunksSize; j++) {
                     level.getChunk(room.origin().offset(new BlockPos(i*TrapdoorRoomRegion.VANILLA_CHUNK_SIZE,0,j*TrapdoorRoomRegion.VANILLA_CHUNK_SIZE)))
                             .fillBiomesFromNoise(
                             biomeSource,
@@ -233,13 +227,51 @@ public class TrapdoorRoomsSavedData extends SavedData {
                 }
             }
         }
+    }
 
-        return room;
+    private void generateStructure(Identifier structure, TrapdoorRoom room) {
+        StructureTemplateManager structureManager = level.getServer().getStructureManager();
+        Optional<StructureTemplate> optionalTemplate = structureManager.get(structure);
+        if (optionalTemplate.isEmpty()){
+            level.players().forEach(
+                    (p) -> p.sendSystemMessage(Component.literal(
+                                    "Error when generating structure: "
+                                            + structure+" not found, generating default room")
+                            .withStyle(ChatFormatting.RED,ChatFormatting.UNDERLINE))
+            );
+            optionalTemplate = structureManager.get(DimensionTrapdoors.TRAPDOOR_ROOM_TYPES.getDefaultKey());
+        }
+        StructureTemplate template = optionalTemplate.orElseThrow();
+        // I have no clue what the number that I put into the flags argument does
+        template.placeInWorld(level, room.origin(), room.origin(), new StructurePlaceSettings(), level.getRandom(), 0b1100110010);
     }
 
     private int[] arrayIndexToPos(int idx, int width) {
         int x = idx % width;
         int y = idx / width;
         return new int[]{x,y};
+    }
+
+    public TrapdoorRoomsSavedData mergeFiles(TrapdoorRoomsSavedData other){
+        int roomOffset = rooms.size();
+        int roomRegionOffset = roomRegions.size();
+        int entrypointOffset = entrypoints.size();
+        roomRegions.addAll(other.roomRegions.stream().map(rR -> {
+            int[] pos = nextNewRegionPos();
+            return new TrapdoorRoomRegion(rR.roomChunkSize(),pos[0],pos[1],
+                    new ArrayList<>(rR.roomsIds().stream().map(i->i+roomOffset).toList()));
+        }).toList());
+        rooms.addAll(other.rooms.stream().map(r-> new TrapdoorRoomInfo(r.relativeSpawnPos(),r.x(),r.y(),r.structure(),r.biome(),r.roomRegionId()+roomRegionOffset,r.chunksSize())).toList());
+        entrypoints.addAll(other.entrypoints.stream().map(e->new DimensionEntrypoint(e.roomId()+roomOffset,e.trapdoorPos(),
+                e.fromRoomId().isPresent()? Optional.of(e.fromRoomId().get() + roomOffset) :Optional.empty(),
+                e.toEntrypointId().isPresent()?Optional.of(e.toEntrypointId().get()+entrypointOffset):Optional.empty())).toList());
+
+        rooms.subList(roomOffset,rooms.size()).forEach(r->{
+            TrapdoorRoom ro = getRoom(rooms.indexOf(r));
+            generateStructure(r.structure(),ro);
+            placeBiome(r.biome(),r.chunksSize(),ro);
+        });
+
+        return this;
     }
 }

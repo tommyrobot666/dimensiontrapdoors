@@ -4,11 +4,7 @@ import lommie.dimensiontrapdoors.DimensionTrapdoors;
 import lommie.dimensiontrapdoors.saveddata.TrapdoorRoomsSavedData;
 import lommie.dimensiontrapdoors.trapdoorroom.DimensionEntrypoint;
 import lommie.dimensiontrapdoors.trapdoorroom.TrapdoorRoom;
-import lommie.dimensiontrapdoors.trapdoorroom.TrapdoorRoomInfo;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -24,6 +20,16 @@ import java.util.Set;
 public class DimensionTrapdoor extends TrapDoorBlock {
     public DimensionTrapdoor(Properties properties) {
         super(ModBlockSetTypes.DIMENSION_BLOCK, properties);
+    }
+
+    @Override
+    protected void onPlace(@NotNull BlockState blockState, @NotNull Level level, @NotNull BlockPos blockPos, @NotNull BlockState blockState2, boolean bl) {
+        if (!(level instanceof ServerLevel serverLevel) || level.isClientSide()) return;
+
+        TrapdoorRoomsSavedData savedData = TrapdoorRoomsSavedData.getFromLevel(serverLevel);
+        if (savedData.rooms.isEmpty()){
+            savedData.findEntrypointOrCreate(blockPos,null);
+        }
     }
 
     @Override
@@ -47,9 +53,9 @@ public class DimensionTrapdoor extends TrapDoorBlock {
 
         player.teleportTo(
                 Objects.requireNonNull(serverLevel.getServer().getLevel(DimensionTrapdoors.TRAPDOOR_DIM)),
-                tpTo.getX(),
-                tpTo.getY(),
-                tpTo.getZ(),
+                tpTo.getX()+.5,
+                tpTo.getY()+.5,
+                tpTo.getZ()+.5,
                 Set.of(),
                 0,0,
                 false
