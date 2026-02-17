@@ -22,5 +22,7 @@ public class LanguageProvider extends FabricLanguageProvider {
         tb.add(ModBlocks.DIMENSION_DARKNESS_SWIRL.get().asItem(),"Dimension Darkness Swirl");
         tb.add(ModBlocks.DIMENSION_TRAPDOOR.get(),"Dimension Trapdoor");
         tb.add(ModBlocks.DIMENSION_TRAPDOOR.get().asItem(),"Dimension Trapdoor");
+        tb.add(ModBlocks.PEDESTAL.get().asItem(),"Pedestal");
+        tb.add(ModBlocks.PEDESTAL.get(),"Pedestal");
     }
 }

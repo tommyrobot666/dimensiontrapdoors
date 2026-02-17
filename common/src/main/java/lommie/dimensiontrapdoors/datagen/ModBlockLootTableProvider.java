@@ -22,6 +22,7 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         dropOther(ModBlocks.DIMENSION_DARKNESS.get(),ModBlocks.DIMENSION_BLOCK.get().asItem());
         dropOther(ModBlocks.DIMENSION_DARKNESS_SWIRL.get(),ModBlocks.DIMENSION_BLOCK.get().asItem());
         dropSelf(ModBlocks.DIMENSION_TRAPDOOR.get());
+        dropSelf(ModBlocks.PEDESTAL.get());
     }
 
     @Override

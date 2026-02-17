@@ -4,7 +4,16 @@ import lommie.dimensiontrapdoors.block.ModBlocks;
 import net.minecraft.client.data.models.BlockModelGenerators;
 import net.minecraft.client.data.models.ItemModelGenerators;
 import net.minecraft.client.data.models.ModelProvider;
+import net.minecraft.client.data.models.MultiVariant;
+import net.minecraft.client.data.models.blockstates.BlockModelDefinitionGenerator;
+import net.minecraft.client.data.models.blockstates.MultiVariantGenerator;
+import net.minecraft.client.data.models.model.TexturedModel;
+import net.minecraft.client.renderer.block.model.Variant;
 import net.minecraft.data.PackOutput;
+import net.minecraft.util.random.WeightedList;
+
+import java.lang.reflect.Field;
+import java.util.function.Consumer;
 
 public class ModModelProvider extends ModelProvider {
     public ModModelProvider(PackOutput packOutput) {
@@ -19,6 +28,17 @@ public class ModModelProvider extends ModelProvider {
         g.createTrapdoor(ModBlocks.DIMENSION_TRAPDOOR.get());
         g.createTrivialCube(ModBlocks.DIMENSION_DARKNESS_SWIRL.get());
         g.registerSimpleFlatItemModel(ModBlocks.DIMENSION_DARKNESS_SWIRL.get());
+        g.createTrivialBlock(ModBlocks.PEDESTAL.get(),TexturedModel.COLUMN);
+        /*Consumer<BlockModelDefinitionGenerator> blockStateOutput;
+        try {
+            Field f = BlockModelGenerators.class.getDeclaredField("blockStateOutput");
+            f.setAccessible(true);
+            blockStateOutput = (Consumer<BlockModelDefinitionGenerator>) f.get(g);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+        blockStateOutput.accept(MultiVariantGenerator.dispatch(ModBlocks.PEDESTAL.get()).);*/
+        g.registerSimpleFlatItemModel(ModBlocks.PEDESTAL.get());
     }
 
     public void generateItemModels(ItemModelGenerators g) {

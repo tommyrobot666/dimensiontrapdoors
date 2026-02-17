@@ -1,5 +1,10 @@
 accessWidener	v2	named
-# This file copys all of the access wideners for BlockModelGenerators and ItemModelGenerators defined in fabric-data-generation-api-v1.accesswidener
+
+
+accessible field net/minecraft/client/data/models/BlockModelGenerators blockStateOutput Ljava/util/function/Consumer;
+
+
+# This section copys all of the access wideners for BlockModelGenerators and ItemModelGenerators defined in fabric-data-generation-api-v1.accesswidener
 transitive-accessible	method	net/minecraft/client/data/models/BlockModelGenerators	plainModel	(Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/renderer/block/model/Variant;
 transitive-accessible	method	net/minecraft/client/data/models/BlockModelGenerators	variant	(Lnet/minecraft/client/renderer/block/model/Variant;)Lnet/minecraft/client/data/models/MultiVariant;
 transitive-accessible	method	net/minecraft/client/data/models/BlockModelGenerators	variants	([Lnet/minecraft/client/renderer/block/model/Variant;)Lnet/minecraft/client/data/models/MultiVariant;
