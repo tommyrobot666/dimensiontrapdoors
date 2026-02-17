@@ -25,11 +25,10 @@ public class DimensionTrapdoor extends TrapDoorBlock {
     @Override
     protected void onPlace(@NotNull BlockState blockState, @NotNull Level level, @NotNull BlockPos blockPos, @NotNull BlockState blockState2, boolean bl) {
         if (!(level instanceof ServerLevel serverLevel) || level.isClientSide()) return;
+        if (serverLevel.dimension().equals(DimensionTrapdoors.TRAPDOOR_DIM)) return;
 
         TrapdoorRoomsSavedData savedData = TrapdoorRoomsSavedData.getFromLevel(serverLevel);
-        if (savedData.rooms.isEmpty()){
-            savedData.findEntrypointOrCreate(blockPos,null);
-        }
+        savedData.findEntrypointOrCreate(blockPos,null);
     }
 
     @Override

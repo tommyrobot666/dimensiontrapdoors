@@ -48,4 +48,7 @@ public class PedestalBlock extends BaseEntityBlock {
 
         return InteractionResult.SUCCESS;
     }
+
+    //TODO: the block doesn't drop the item inside
+    //TODO: check useShapeForLightOcclusion and other methods
 }

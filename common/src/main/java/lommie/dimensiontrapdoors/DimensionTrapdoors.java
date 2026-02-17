@@ -41,7 +41,6 @@ public final class DimensionTrapdoors {
 
         LifecycleEvent.SERVER_STARTED.register(server -> {
             ServerLevel trapdoorDim = Objects.requireNonNull(server.getLevel(TRAPDOOR_DIM));
-            ensureDimensionGenerated(trapdoorDim);
             migrateDataStoredInTrapdoorDimToOverworld(server, trapdoorDim);
         });
 
@@ -58,16 +57,6 @@ public final class DimensionTrapdoors {
                     trapdoorDim.getDataStorage().get(TrapdoorRoomsSavedData.TYPE)
                             .mergeFiles(TrapdoorRoomsSavedData.getFromLevel(trapdoorDim))
             );
-        }
-    }
-
-    private static void ensureDimensionGenerated(ServerLevel trapdoorDim) {
-
-        if (!trapdoorDim.hasChunk(0,0)){
-            trapdoorDim.getChunkSource().addTicket(
-                    new Ticket(TicketType.UNKNOWN, 0),
-                    new ChunkPos(0,0)
-                    );
         }
     }
 }

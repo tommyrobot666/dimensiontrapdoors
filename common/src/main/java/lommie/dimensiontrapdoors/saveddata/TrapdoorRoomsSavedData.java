@@ -11,7 +11,10 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.Ticket;
+import net.minecraft.server.level.TicketType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
@@ -68,6 +71,9 @@ public class TrapdoorRoomsSavedData extends SavedData {
             CODEC,
             null
     );
+
+    public static final TicketType TRAPDOOR_LOADS_CHUNKS = new TicketType(40L,
+            TicketType.FLAG_PERSIST|TicketType.FLAG_LOADING|TicketType.FLAG_KEEP_DIMENSION_ACTIVE|TicketType.FLAG_SIMULATION);
 
     public final ArrayList<TrapdoorRoomRegion> roomRegions;
     public final ArrayList<TrapdoorRoomInfo> rooms;
@@ -138,7 +144,7 @@ public class TrapdoorRoomsSavedData extends SavedData {
     }
 
     private TrapdoorRoomsSavedData setLevel(ServerLevel serverLevel) {
-        level = serverLevel;
+        level = serverLevel.getServer().getLevel(DimensionTrapdoors.TRAPDOOR_DIM);
         return this;
     }
 
@@ -204,6 +210,8 @@ public class TrapdoorRoomsSavedData extends SavedData {
         roomRegion.roomsIds().add(rooms.indexOf(trapdoorRoomInfo));
         TrapdoorRoom room = getRoom(rooms.indexOf(trapdoorRoomInfo));
 
+        loadRoomChunks(level,room);
+
         generateStructure(trapdoorRoomType.structure(), room);
 
         placeBiome(trapdoorRoomType.biome(), trapdoorRoomType.chunksSize(), room);
@@ -261,6 +269,7 @@ public class TrapdoorRoomsSavedData extends SavedData {
             return new TrapdoorRoomRegion(rR.roomChunkSize(),pos[0],pos[1],
                     new ArrayList<>(rR.roomsIds().stream().map(i->i+roomOffset).toList()));
         }).toList());
+        //TODO: an converted world had roomRegions and entrypoints, but not rooms
         rooms.addAll(other.rooms.stream().map(r-> new TrapdoorRoomInfo(r.relativeSpawnPos(),r.x(),r.y(),r.structure(),r.biome(),r.roomRegionId()+roomRegionOffset,r.chunksSize())).toList());
         entrypoints.addAll(other.entrypoints.stream().map(e->new DimensionEntrypoint(e.roomId()+roomOffset,e.trapdoorPos(),
                 e.fromRoomId().isPresent()? Optional.of(e.fromRoomId().get() + roomOffset) :Optional.empty(),
@@ -273,5 +282,18 @@ public class TrapdoorRoomsSavedData extends SavedData {
         });
 
         return this;
+    }
+
+    private static void loadRoomChunks(ServerLevel trapdoorDim, TrapdoorRoom room) {
+        BlockPos startPos = room.origin();
+        ServerChunkCache chunkSource = trapdoorDim.getChunkSource();
+        for (int i = 0; i < room.in().chunksSize(); i++) {
+            for (int j = 0; j < room.in().chunksSize(); j++) {
+                chunkSource.addTicket(
+                        new Ticket(TRAPDOOR_LOADS_CHUNKS, 0),
+                        new ChunkPos(startPos.offset(i*TrapdoorRoomRegion.VANILLA_CHUNK_SIZE,0,j*TrapdoorRoomRegion.VANILLA_CHUNK_SIZE))
+                );
+            }
+        }
     }
 }
