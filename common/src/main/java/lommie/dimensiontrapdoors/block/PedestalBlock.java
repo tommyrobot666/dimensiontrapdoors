@@ -6,19 +6,27 @@ import lommie.dimensiontrapdoors.blockentity.PedestalBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.WorldlyContainer;
+import net.minecraft.world.WorldlyContainerHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
 
-public class PedestalBlock extends BaseEntityBlock {
+import java.util.ArrayList;
+import java.util.List;
+
+public class PedestalBlock extends BaseEntityBlock implements WorldlyContainerHolder {
     protected PedestalBlock(Properties properties) {
         super(properties);
     }
@@ -49,6 +57,20 @@ public class PedestalBlock extends BaseEntityBlock {
         return InteractionResult.SUCCESS;
     }
 
-    //TODO: the block doesn't drop the item inside
-    //TODO: check useShapeForLightOcclusion and other methods
+    @Override
+    protected @NotNull List<ItemStack> getDrops(@NotNull BlockState blockState, LootParams.@NotNull Builder builder) {
+        ArrayList<ItemStack> list = new ArrayList<>(super.getDrops(blockState, builder));
+        list.add(((PedestalBlockEntity) builder.getParameter(LootContextParams.BLOCK_ENTITY)).item);
+        return list;
+    }
+
+    @Override
+    protected boolean useShapeForLightOcclusion(@NotNull BlockState blockState) {
+        return true;
+    }
+
+    @Override
+    public @NotNull WorldlyContainer getContainer(@NotNull BlockState blockState, @NotNull LevelAccessor levelAccessor, @NotNull BlockPos blockPos) {
+        return ((PedestalBlockEntity) levelAccessor.getBlockEntity(blockPos));
+    }
 }
