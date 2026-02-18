@@ -43,7 +43,7 @@ public class PedestalBlock extends BaseEntityBlock implements WorldlyContainerHo
 
     @Override
     public @Nullable <T extends BlockEntity> BlockEntityTicker<T> getTicker(@NotNull Level level, @NotNull BlockState blockState, @NotNull BlockEntityType<T> blockEntityType) {
-        return createTickerHelper(blockEntityType, ModBlockEntities.PEDESTAL.get(),((level1, blockPos, blockState1, blockEntity) -> PedestalBlockEntity.tick(level1,blockPos,blockState1, blockEntity)));
+        return createTickerHelper(blockEntityType, ModBlockEntities.PEDESTAL.get(),(PedestalBlockEntity::tick));
     }
 
     @Override
