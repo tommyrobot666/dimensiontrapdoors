@@ -35,6 +35,6 @@ public class BuiltInTrapdoorRoomTypes {
         for (int i = 1; i < 5; i++) {
             registerType("mining_pit_"+i, new BlockPos(1, 21 - 4, 1), 1);
         }
-        //TODO: room with food, room with animals, other room, room with lots of trapdoors x2
+        //TODO: room with food, room with animals, other room, room with lots of trapdoors x2, village
     }
 }
