@@ -1,6 +1,5 @@
 package lommie.dimensiontrapdoors.neoforge.datagen;
 
-import dev.architectury.platform.Mod;
 import dev.architectury.platform.Platform;
 import lommie.dimensiontrapdoors.DimensionTrapdoors;
 import lommie.dimensiontrapdoors.datagen.CommonDataGen;

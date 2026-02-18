@@ -6,5 +6,6 @@ import org.jetbrains.annotations.NotNull;
 
 public class PedestalBlockEntityRenderState extends BlockEntityRenderState {
     // in vanilla BlockEntityRenderState, this would be nullable
-    @NotNull ItemStackRenderState item = new ItemStackRenderState();
+    @NotNull
+    final ItemStackRenderState item = new ItemStackRenderState();
 }

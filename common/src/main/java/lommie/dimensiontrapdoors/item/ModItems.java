@@ -19,18 +19,23 @@ public class ModItems {
         return ITEMS.register(id,() -> blockConstructor.apply(properties.setId(ResourceKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(DimensionTrapdoors.MOD_ID,id)))));
     }
 
+    @SuppressWarnings("unused")
     public final static DeferredSupplier<Item> DIMENSION_DARKNESS =
             register("dimension_darkness", (p) -> new BlockItem(ModBlocks.DIMENSION_DARKNESS.get(),p), new Item.Properties());
 
+    @SuppressWarnings("unused")
     public final static DeferredSupplier<Item> DIMENSION_BLOCK =
             register("dimension_block", (p) -> new BlockItem(ModBlocks.DIMENSION_BLOCK.get(),p), new Item.Properties());
 
+    @SuppressWarnings("unused")
     public final static DeferredSupplier<Item> PEDESTAL =
             register("pedestal", (p) -> new BlockItem(ModBlocks.PEDESTAL.get(),p), new Item.Properties());
 
+    @SuppressWarnings("unused")
     public final static DeferredSupplier<Item> DIMENSION_TRAPDOOR =
             register("dimension_trapdoor", (p) -> new BlockItem(ModBlocks.DIMENSION_TRAPDOOR.get(),p), new Item.Properties());
 
+    @SuppressWarnings("unused")
     public final static DeferredSupplier<Item> DIMENSION_DARKNESS_SWIRL =
             register("dimension_darkness_swirl", (p) -> new BlockItem(ModBlocks.DIMENSION_DARKNESS_SWIRL.get(),p), new Item.Properties());
 }

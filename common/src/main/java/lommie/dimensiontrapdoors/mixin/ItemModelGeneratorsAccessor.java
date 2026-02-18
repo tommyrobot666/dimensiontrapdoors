@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(ItemModelGenerators.class)
 public interface ItemModelGeneratorsAccessor {
+    @SuppressWarnings("unused")
     @Accessor("itemModelOutput")
     ItemModelOutput getItemModelOutput();
 }

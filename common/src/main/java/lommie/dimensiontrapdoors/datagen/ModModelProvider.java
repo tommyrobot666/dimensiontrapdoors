@@ -4,16 +4,8 @@ import lommie.dimensiontrapdoors.block.ModBlocks;
 import net.minecraft.client.data.models.BlockModelGenerators;
 import net.minecraft.client.data.models.ItemModelGenerators;
 import net.minecraft.client.data.models.ModelProvider;
-import net.minecraft.client.data.models.MultiVariant;
-import net.minecraft.client.data.models.blockstates.BlockModelDefinitionGenerator;
-import net.minecraft.client.data.models.blockstates.MultiVariantGenerator;
 import net.minecraft.client.data.models.model.TexturedModel;
-import net.minecraft.client.renderer.block.model.Variant;
 import net.minecraft.data.PackOutput;
-import net.minecraft.util.random.WeightedList;
-
-import java.lang.reflect.Field;
-import java.util.function.Consumer;
 
 public class ModModelProvider extends ModelProvider {
     public ModModelProvider(PackOutput packOutput) {
@@ -41,6 +33,7 @@ public class ModModelProvider extends ModelProvider {
         g.registerSimpleFlatItemModel(ModBlocks.PEDESTAL.get());
     }
 
+    @SuppressWarnings({"EmptyMethod", "unused"})
     public void generateItemModels(ItemModelGenerators g) {
     }
 }

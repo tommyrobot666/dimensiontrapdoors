@@ -27,6 +27,7 @@ public class PedestalBlockEntity extends BlockEntity implements ItemOwner, World
         super(ModBlockEntities.PEDESTAL.get(), blockPos, blockState);
     }
 
+    @SuppressWarnings({"EmptyMethod", "unused"})
     public static void tick(Level level, BlockPos pos, BlockState state, PedestalBlockEntity e) {
 
     }

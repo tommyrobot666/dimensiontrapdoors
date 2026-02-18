@@ -15,9 +15,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.Ticket;
-import net.minecraft.server.level.TicketType;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 
 import java.util.Objects;
@@ -54,7 +51,7 @@ public final class DimensionTrapdoors {
         if (trapdoorDim.getDataStorage().get(TrapdoorRoomsSavedData.TYPE) != null){
             server.overworld().getDataStorage().set(
                     TrapdoorRoomsSavedData.TYPE,
-                    trapdoorDim.getDataStorage().get(TrapdoorRoomsSavedData.TYPE)
+                    Objects.requireNonNull(trapdoorDim.getDataStorage().get(TrapdoorRoomsSavedData.TYPE))
                             .mergeFiles(TrapdoorRoomsSavedData.getFromLevel(trapdoorDim))
             );
         }

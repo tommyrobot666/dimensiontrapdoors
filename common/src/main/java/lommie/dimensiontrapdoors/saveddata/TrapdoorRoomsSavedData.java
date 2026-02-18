@@ -36,7 +36,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 public class TrapdoorRoomsSavedData extends SavedData {
-    public static Codec<@NotNull TrapdoorRoomsSavedData> CODEC = RecordCodecBuilder.create((instance)
+    public static final Codec<@NotNull TrapdoorRoomsSavedData> CODEC = RecordCodecBuilder.create((instance)
     -> instance.group(
             TrapdoorRoomRegion.CODEC.listOf().fieldOf("roomRegions").forGetter(TrapdoorRoomsSavedData::getRoomRegionsList),
             TrapdoorRoomInfo.CODEC.listOf().fieldOf("rooms").forGetter(TrapdoorRoomsSavedData::getRoomInfosList),
@@ -65,7 +65,8 @@ public class TrapdoorRoomsSavedData extends SavedData {
         return roomRegions;
     }
 
-    public static SavedDataType<@NotNull TrapdoorRoomsSavedData> TYPE = new SavedDataType<>(
+    @SuppressWarnings("DataFlowIssue")
+    public static final SavedDataType<@NotNull TrapdoorRoomsSavedData> TYPE = new SavedDataType<>(
             DimensionTrapdoors.MOD_ID+"_trapdoors_rooms",
             TrapdoorRoomsSavedData::empty,
             CODEC,
@@ -128,10 +129,7 @@ public class TrapdoorRoomsSavedData extends SavedData {
             Stream<TrapdoorRoom> rooms = roomRegion.orElseThrow().roomsIds().stream().map(this::getRoom);
             rooms = rooms.filter((room) -> {
                 BlockPos diff = traveling.blockPosition().subtract(room.origin());
-                if (diff.getX() < 0 || diff.getZ() < 0){
-                    return false;
-                }
-                return true;
+                return diff.getX() >= 0 && diff.getZ() >= 0;
             });
             TrapdoorRoom theRoom = rooms.min(Comparator.comparingDouble(r -> r.origin().distSqr(traveling.blockPosition()))).orElseThrow();
             return Optional.of(theRoom.roomId());
